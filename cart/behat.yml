@@ -1,0 +1,25 @@
+default:
+    autoload:
+        '': '%paths.base%/features/bootstrap'
+    suites:
+        default:
+            paths: [ '%paths.base%/features' ] # Where Behat will look for your *.feature files.
+            base_path: '%paths.base%' # base_path passed to LumenMicroService class, used to boot Lumen app
+            base_url: http://127.0.0.1:8000 # base_url passed to LumenMicroService class, used for HTTP Requests
+            formatter:
+              name: pretty,junit,html
+              parameters:
+                output_path: null,junit,behat_report.html
+            contexts:
+                - FeatureContext
+        acceptance:
+            paths: [ '%paths.base%/features/acceptance' ] # Where Behat will look for your *.feature files.
+            base_path: '%paths.base%' # base_path passed to LumenMicroService class, used to boot Lumen app
+            base_url: http://127.0.0.1:8000 # base_url passed to LumenMicroService class, used for HTTP Requests
+            formatter:
+              name: pretty,junit,html
+              parameters:
+                output_path: null,junit,behat_acceptance_report.html
+            contexts:
+                - AcceptanceTestContext
+

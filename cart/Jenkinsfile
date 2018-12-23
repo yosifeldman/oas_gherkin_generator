@@ -1,0 +1,20 @@
+pipeline {
+  agent {
+    docker {
+      image '10.2.42.27:5000/nmi/php-web:latest'
+      args '-v $HOME:/var/www/html'
+    }
+  }
+  stages {
+    stage('Build') {
+      steps {
+        sh 'sh build.sh'
+      }
+    }
+    stage('Test') {
+      steps {
+        sh 'APP_ENV=testing php vendor/bin/behat'
+      }
+    }
+  }
+}

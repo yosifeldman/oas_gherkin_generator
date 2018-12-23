@@ -1,0 +1,1585 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ShoppingCart Mag2 - Rest API",
+    "description": "Shopping Cart REST API for Magento 2  <br/> `Note:` all requests with {cart_id} are open for the cart owner user `and` for the Manager role.",
+    "contact": {
+      "email": "yosef.feldman.contractor@greensmoke.com"
+    },
+    "version": "1.2.0"
+  },
+  "servers": [
+    {
+      "url": "https://cart.nmi.services"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "cart",
+      "description": "CRUD operations on Shopping Cart"
+    },
+    {
+      "name": "products",
+      "description": "CRUD operations on Products inside the Cart"
+    },
+    {
+      "name": "coupon",
+      "description": "add coupon to the Cart"
+    },
+    {
+      "name": "shipping",
+      "description": "add Shipping method to the Cart"
+    },
+    {
+      "name": "checkout",
+      "description": "Checkout with Place Order process"
+    }
+  ],
+  "paths": {
+    "/carts": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Get all shopping carts.",
+        "description": "Retrieve a list of carts, with filter and paging.       Open only for `Manager` role.",
+        "operationId": "cartIndex",
+        "parameters": [
+          {
+            "name": "field",
+            "in": "query",
+            "description": "filter by any field",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "example": "?sku=10m-xxyyzz"
+            }
+          },
+          {
+            "name": "lte",
+            "in": "query",
+            "description": "less then or equal filter.  Available filters are: lt, lte, gt, gte. Example: ?lte[created_at]=2018-20-28",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "retrieved list of carts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Create new cart with products for current user.",
+        "description": "Submit a list of products and create new <Cart>.",
+        "operationId": "cartCreateNew",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Full Cart, including the discount, shipping, taxes and grand total.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullCart"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carts/{cart_id}": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Get cart contents",
+        "description": "Get the <Cart> with products, taxes etc.",
+        "operationId": "cartGetContents",
+        "parameters": [
+          {
+            "name": "cart_id",
+            "in": "path",
+            "description": "<Cart> internal Id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "1sssssd466er00ererx5687"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full Cart, including the discount, shipping, taxes and grand total.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullCart"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Delete the specific Cart.",
+        "description": "Erases the <Cart> from the DB.",
+        "operationId": "cartDelete",
+        "parameters": [
+          {
+            "name": "cart_id",
+            "in": "path",
+            "description": "<Cart> internal Id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "1sssssd466er00ererx5687"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "RESTful DELETE response, no content"
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carts/{cart_id}/items": {
+      "post": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Add one or more Product items to the Cart.",
+        "operationId": "productsAdd",
+        "parameters": [
+          {
+            "name": "cart_id",
+            "in": "path",
+            "description": "<Cart> internal Id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "1sssssd466er00ererx5687"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/body_1"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Full Cart, including the discount, shipping, taxes and grand total.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullCart"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Remove all items from the Cart.",
+        "description": "Remove all <Product> items, but keep the <Cart>.",
+        "operationId": "productsDeleteAll",
+        "parameters": [
+          {
+            "name": "cart_id",
+            "in": "path",
+            "description": "<Cart> internal Id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "1sssssd466er00ererx5687"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "RESTful DELETE response, no content"
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carts/{cart_id}/items/{item_id}": {
+      "put": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Update product quantity, price, etc, BUT not sku.",
+        "operationId": "productsUpdate",
+        "parameters": [
+          {
+            "name": "cart_id",
+            "in": "path",
+            "description": "<Cart> internal Id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "1sssssd466er00ererx5687"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "description": "Product SKU in the cart",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "M10X-020300"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Product"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Full Cart, including the discount, shipping, taxes and grand total.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullCart"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Delete the product from the Cart.",
+        "operationId": "productsDelete",
+        "parameters": [
+          {
+            "name": "cart_id",
+            "in": "path",
+            "description": "<Cart> internal Id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "1sssssd466er00ererx5687"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "description": "Product SKU in the cart",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "M10X-020300"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "RESTful DELETE response, no content"
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carts/{cart_id}/coupon": {
+      "post": {
+        "tags": [
+          "coupon"
+        ],
+        "summary": "Add a coupon discount",
+        "description": "Submit coupon code and set the discount for the Cart.",
+        "operationId": "couponsAdd",
+        "parameters": [
+          {
+            "name": "cart_id",
+            "in": "path",
+            "description": "<Cart> internal Id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "1sssssd466er00ererx5687"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/body_2"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Full Cart, including the discount, shipping, taxes and grand total.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullCart"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "coupon"
+        ],
+        "summary": "Remove coupon discount.",
+        "operationId": "couponsRemove",
+        "parameters": [
+          {
+            "name": "cart_id",
+            "in": "path",
+            "description": "<Cart> internal Id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "1sssssd466er00ererx5687"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "RESTful DELETE response, no content"
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carts/{cart_id}/shipping": {
+      "post": {
+        "tags": [
+          "shipping"
+        ],
+        "summary": "Add shipping method.",
+        "description": "Choose ship method for the Cart and add up the price, if not free.",
+        "operationId": "addShippingMethod",
+        "parameters": [
+          {
+            "name": "cart_id",
+            "in": "path",
+            "description": "<Cart> internal Id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "1sssssd466er00ererx5687"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/body_3"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Full Cart, including the discount, shipping, taxes and grand total.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullCart"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/carts/{cart_id}/checkout": {
+      "post": {
+        "tags": [
+          "checkout"
+        ],
+        "summary": "Place an order.",
+        "description": "Validates all the Cart info internally `and` from external APIs. Then generates a PlaceOrder event `and` erases the cart from the local DB.",
+        "operationId": "placeOrder",
+        "parameters": [
+          {
+            "name": "cart_id",
+            "in": "path",
+            "description": "<Cart> internal Id",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "1sssssd466er00ererx5687"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/body_4"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Order placed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_2"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shipping": {
+      "get": {
+        "tags": [
+          "shipping"
+        ],
+        "summary": "Get all shipping methods",
+        "description": "Retrieve all available <shipping> methods",
+        "operationId": "shippingIndex",
+        "responses": {
+          "200": {
+            "description": "retrieved list of ship methods",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_1"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/coupons": {
+      "get": {
+        "tags": [
+          "coupon"
+        ],
+        "summary": "Get all coupons",
+        "description": "Retrieve a list of all available <Coupon> discounts for all customers",
+        "operationId": "couponIndex",
+        "responses": {
+          "200": {
+            "description": "retrieved list of coupons",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_3"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "coupon"
+        ],
+        "summary": "Create new coupon",
+        "description": "Add new <Coupon> possibility for all customers",
+        "operationId": "couponCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Coupon"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Coupon created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coupon"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error. Coupon already exists.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/coupons/{coupon_code}": {
+      "get": {
+        "tags": [
+          "coupon"
+        ],
+        "summary": "Get specific coupon",
+        "description": "Get <Coupon> by <coupon_code>",
+        "operationId": "couponGet",
+        "parameters": [
+          {
+            "name": "coupon_code",
+            "in": "path",
+            "description": "<Coupon> code",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "MX-10-NEW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "retrieved coupon",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coupon"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "coupon"
+        ],
+        "summary": "Delete coupon",
+        "description": "Delete <Coupon> by <coupon_code>",
+        "operationId": "couponDelete",
+        "parameters": [
+          {
+            "name": "coupon_code",
+            "in": "path",
+            "description": "<Coupon> code",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "MX-10-NEW"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "RESTful DELETE response, no content"
+          },
+          "401": {
+            "description": "Auth token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The page you are looking for does not exist.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "required": [
+          "error"
+        ],
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "Cart": {
+        "required": [
+          "brand",
+          "customer_id",
+          "products"
+        ],
+        "type": "object",
+        "properties": {
+          "brand": {
+            "type": "string",
+            "example": "markten"
+          },
+          "customer_id": {
+            "$ref": "#/components/schemas/UUID"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          }
+        }
+      },
+      "Product": {
+        "required": [
+          "name",
+          "price",
+          "qty",
+          "sku"
+        ],
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "description": "Unique product identifier",
+            "example": "x-y-z-1"
+          },
+          "name": {
+            "type": "string",
+            "description": "Product name",
+            "example": "Markten Vapor 1"
+          },
+          "qty": {
+            "type": "integer",
+            "description": "Product quantity",
+            "format": "int32",
+            "example": 4
+          },
+          "description": {
+            "type": "string",
+            "example": "This is the Best E-Vapor"
+          },
+          "price": {
+            "type": "number",
+            "description": "Single product price",
+            "example": 15.6
+          }
+        }
+      },
+      "Shipping": {
+        "required": [
+          "method"
+        ],
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "example": "fedex_3_5_days"
+          },
+          "price": {
+            "type": "number",
+            "example": 5.5
+          }
+        },
+        "description": "Shipping item for the Cart"
+      },
+      "UUID": {
+        "type": "string",
+        "description": "Customer UUID",
+        "example": "c8aa185e-d849-11e8-b513-0242c0a89065"
+      },
+      "Coupon": {
+        "type": "object",
+        "properties": {
+          "coupon_code": {
+            "type": "string",
+            "description": "New customer discount",
+            "example": "MX-10-NEW"
+          },
+          "reward_points_balance": {
+            "type": "integer",
+            "example": 10
+          },
+          "reward_currency_amount": {
+            "type": "number",
+            "example": 25.5
+          },
+          "shipping_discount": {
+            "type": "number",
+            "example": 0
+          }
+        }
+      },
+      "Totals": {
+        "type": "object",
+        "properties": {
+          "subtotal": {
+            "$ref": "#/components/schemas/Totals_subtotal"
+          },
+          "discount": {
+            "$ref": "#/components/schemas/Totals_discount"
+          },
+          "shipping": {
+            "$ref": "#/components/schemas/Totals_shipping"
+          },
+          "tax": {
+            "type": "number",
+            "example": 17
+          },
+          "giftcardaccount": {
+            "$ref": "#/components/schemas/Totals_giftcardaccount"
+          },
+          "grand_total": {
+            "$ref": "#/components/schemas/Totals_grand_total"
+          },
+          "giftwrapping": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      },
+      "FullCart": {
+        "description": "Full Cart with Totals, Shipping, Taxes etc.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Cart"
+          },
+          {
+            "$ref": "#/components/schemas/Totals"
+          },
+          {
+            "$ref": "#/components/schemas/Shipping"
+          }
+        ]
+      },
+      "inline_response_200": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FullCart"
+            }
+          }
+        }
+      },
+      "body": {
+        "type": "object",
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          }
+        }
+      },
+      "inline_response_200_1": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Shipping"
+            }
+          }
+        }
+      },
+      "inline_response_200_3": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Coupon"
+            }
+          }
+        }
+      },
+      "body_1": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          }
+        }
+      },
+      "body_2": {
+        "required": [
+          "coupon_code"
+        ],
+        "type": "object",
+        "properties": {
+          "coupon_code": {
+            "type": "string",
+            "example": "M10-first-time-10-percent"
+          }
+        }
+      },
+      "body_3": {
+        "required": [
+          "shipping_method"
+        ],
+        "properties": {
+          "shipping_method": {
+            "type": "string",
+            "example": "by-airplane"
+          }
+        }
+      },
+      "body_4": {
+        "required": [
+          "agreement",
+          "cart"
+        ],
+        "properties": {
+          "cart": {
+            "$ref": "#/components/schemas/FullCart"
+          },
+          "agreement": {
+            "type": "boolean"
+          }
+        }
+      },
+      "inline_response_200_2": {
+        "type": "object",
+        "properties": {
+          "order_ref": {
+            "type": "string",
+            "description": "Unique order reference",
+            "example": "E68-28123333"
+          }
+        }
+      },
+      "Totals_subtotal": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Subtotal"
+          },
+          "value": {
+            "type": "number",
+            "example": 25.5
+          }
+        }
+      },
+      "Totals_discount": {
+        "type": "object",
+        "properties": {
+          "discount": {
+            "type": "number",
+            "example": 10
+          },
+          "coupon_code": {
+            "type": "string",
+            "example": "birthday_10_percent"
+          }
+        }
+      },
+      "Totals_shipping": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "by_train"
+          },
+          "price": {
+            "type": "number",
+            "example": 0
+          }
+        }
+      },
+      "Totals_giftcardaccount": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "amex"
+          },
+          "value": {
+            "type": "number",
+            "example": 1
+          }
+        }
+      },
+      "Totals_grand_total": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "grand total"
+          },
+          "value": {
+            "type": "number",
+            "example": 55
+          }
+        }
+      }
+    },
+    "responses": {
+      "OrderPlaced": {
+        "description": "Order placed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/inline_response_200_2"
+            }
+          }
+        }
+      },
+      "FullCartResponse": {
+        "description": "Full Cart, including the discount, shipping, taxes and grand total.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/FullCart"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "The page you are looking for does not exist.",
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Auth token is missing or invalid.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Internal server error.",
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "itemIdParam": {
+        "name": "item_id",
+        "in": "path",
+        "description": "Product SKU in the cart",
+        "required": true,
+        "style": "simple",
+        "explode": false,
+        "schema": {
+          "type": "string",
+          "example": "M10X-020300"
+        }
+      },
+      "cartIdParam": {
+        "name": "cart_id",
+        "in": "path",
+        "description": "<Cart> internal Id",
+        "required": true,
+        "style": "simple",
+        "explode": false,
+        "schema": {
+          "type": "string",
+          "example": "1sssssd466er00ererx5687"
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+version: "2"
+
+services:
+  cart:
+    image: 10.2.42.27:5000/nmi/php-web:latest
+    networks:
+      - appnet
+      - proxy
+    volumes:
+      - ./:/var/www/html
+    extra_hosts:
+      - "auth.nmi.services:10.1.1.130"
+      - "taxes.nmi.services:10.1.1.122"
+      - "customers.nmi.services:10.1.1.122"
+      - "products.nmi.services:10.1.1.122"
+    environment:
+      - DISPLAY_NAME=Cart MS
+      - OPCACHE_ENABLE=1
+      - NEW_RELIC_ENABLED=0
+      - NEW_RELIC_APP_NAME=Cart MS
+      - XDEBUG_ENABLE=On
+      - XDEBUG_REMOTE_HOST=10.1.20.139
+      - XDEBUG_REMOTE_PORT=9001
+      - VIRTUAL_HOST=cart.nmi.services
+
+#  redis:
+#      image: redis:5.0.0-alpine
+#      command: redis-server --appendonly yes
+#      networks:
+#        - appnet
+
+networks:
+  appnet:
+  proxy:
+    external:
+      name: discovery
